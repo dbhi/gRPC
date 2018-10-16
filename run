@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# WORK_DIR="/go/src/github.com/umarcor/dbhi/router"
+# docker run --rm -itv "$(pwd):$WORK_DIR" -w "$WORK_DIR" aptman/dbhi:gRPC bash
+
+cd $(dirname $0)
+
+go get -u google.golang.org/grpc
+go get -u github.com/golang/protobuf/protoc-gen-go
+
+go get -v ./...
+
+cd lib
+protoc -I . lib.proto --go_out=plugins=grpc:.

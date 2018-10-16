@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package lib;
+
+message Void {}
+
+message Id {
+    string id = 1;
+}
+
+message Value {
+    int32 val = 1;
+}
+
+message Register {
+    string id = 1;
+    int32 length = 2;
+}
+
+message Write {
+    string id = 1;
+    int32 val = 2;
+}
+
+message ChanList {
+    repeated Id chans = 1;
+}
+
+service Chans {
+    rpc List(Void) returns(ChanList) {}
+    rpc Reg(Register) returns(Void) {}
+    rpc Wr(Write) returns (Void) {}
+    rpc Rd(Id) returns(Value) {}
+}
