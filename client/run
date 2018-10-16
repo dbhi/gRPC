@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cd $(dirname $0)
+
+go build -o "libgrpc-go.so" -buildmode=c-shared *.go
