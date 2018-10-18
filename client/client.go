@@ -28,31 +28,43 @@ func connect(addr string) {
 // register checks if each of the elements in a slice of IDs is found in the list retrieved from the server.
 // If it is not present, it is registered (added).
 func register(ids []string) (err error) {
-	u := &lib.ChanList{}
-	u, err = client.List(ctx, &lib.Void{})
+	l, err := list()
 	if err != nil {
 		return
 	}
-
 	for _, id := range ids {
-		reg := true
-		if len(u.Chans) != 0 {
-			for _, v := range u.Chans {
-				if v.Id == id {
-					reg = false
-					break
-				}
-			}
-		}
-		if reg {
+		if !check_id(l, id) {
 			_, err = client.Reg(ctx, &lib.Register{Id: id, Length: 8192})
 			if err != nil {
 				return
 			}
 		}
 	}
-
 	return
+}
+
+// list retrieves a list of channel identifiers from the server.
+func list() (l []string, err error) {
+	u := &lib.ChanList{}
+	u, err = client.List(ctx, &lib.Void{})
+	if (err == nil) && len(u.Chans) != 0 {
+		for _, v := range u.Chans {
+			l = append(l, v.Id)
+		}
+	}
+	return
+}
+
+// check_id checks if a channel, 'id', is found in a list of identifiers, 'l'.
+func check_id(l []string, id string) bool {
+	if len(l) != 0 {
+		for _, v := range l {
+			if v == id {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // read pops a value from channel 'id'.
