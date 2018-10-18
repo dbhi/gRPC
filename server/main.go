@@ -65,7 +65,7 @@ func (chanServer) Wr(ctx context.Context, args *lib.Write) (v *lib.Void, err err
 	if s, ok := db[id]; ok {
 		err = s.write(args.Val)
 	}
-	return
+	return v, errors.New("chan does not exist")
 }
 
 func (chanServer) Rd(ctx context.Context, i *lib.Id) (v *lib.Value, err error) {
@@ -75,7 +75,7 @@ func (chanServer) Rd(ctx context.Context, i *lib.Id) (v *lib.Value, err error) {
 		v.Val, err = s.read()
 		return
 	}
-	return
+	return v, errors.New("chan does not exist")
 }
 
 func (chanServer) Reg(ctx context.Context, r *lib.Register) (v *lib.Void, err error) {
@@ -87,8 +87,6 @@ func (chanServer) Reg(ctx context.Context, r *lib.Register) (v *lib.Void, err er
 		db[id] = &s
 		chans.Chans = append(chans.Chans, &lib.Id{Id: id})
 		return
-	} else {
-		return v, errors.New("UUT exists!")
 	}
-	return
+	return v, errors.New("chan exists")
 }
