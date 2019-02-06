@@ -1,7 +1,0 @@
-#!/bin/sh
-
-cd $(dirname $0)/..
-
-case="eg"
-
-gcc -o "grpc-$case" "$case/main.c" "./grpc-go.so"
