@@ -1,14 +1,48 @@
 #!/bin/sh
 
-# WORK_DIR="/go/src/github.com/umarcor/dbhi/router"
-# docker run --rm -itv "$(pwd):$WORK_DIR" -w "$WORK_DIR" aptman/dbhi:gRPC bash
+set -e
 
 cd $(dirname $0)
 
+header(){
+  echo ""
+  echo "|> $1"
+}
+
+header "Get grpc and protoc-gen-go"
 go get -u google.golang.org/grpc
 go get -u github.com/golang/protobuf/protoc-gen-go
 
-go get -v ./...
+mkdir -p dist
 
+header "Execute protoc"
 cd lib
+go get -v ./...
 protoc -I . lib.proto --go_out=plugins=grpc:.
+
+header "Go build the server"
+cd ../server
+go build -a -o ../dist/dbhi-grpc-server
+
+header "Go build the client shared library"
+cd ../client
+go build -o "libgrpc-go.so" -buildmode=c-shared *.go
+
+header "Build the C example client"
+cd eg-c
+gcc -o "../../dist/dbhi-grpc-eg-c" -I../ "main.c" "../libgrpc-go.so"
+
+header "Move shared library and header to dist"
+cd ..
+cp libgrpc-go.so ../dist
+cp libgrpc-go.h ../dist
+
+header "Build the Go example client"
+cd eg-go
+cp ../client.go ./
+go build -a -o ../../dist/dbhi-grpc-eg-go
+rm client.go
+
+header "Go build then client gen"
+cd ../gen
+go build -a -o ../../dist/dbhi-grpc-gen

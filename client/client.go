@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/umarcor/dbhi/router/lib"
+	"github.com/umarcor/dbhi/gRPC/lib"
 	grpc "google.golang.org/grpc"
 )
 
