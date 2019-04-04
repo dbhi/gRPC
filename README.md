@@ -1,6 +1,6 @@
-# [DBHI] gRPC
+# [DBHI] Dynamic Binary Hardware Injection: gRPC server and clients
 
-This subdir contains sources to provide inter-process communication through [gRPC Remote Procedure Calls](https://grpc.io/). gRPC generates cross-platform client and server bindings for many languages. We used [go(lang)](https://golang.org/) to write both the server and two example clients. The server provides a go channel for each identifier added to the list through the API. Then, read and write methods are available for clients to interchange information with FIFO-alike interfaces. Moreover, helper functions for clients can be built to a shared library and it can be used in C applications.
+This repository contains resources to provide inter-process communication through [gRPC Remote Procedure Calls](https://grpc.io/) in the context of Dynamic Binary Hardware Injection (DBHI). gRPC supports cross-platform client and server bindings for many languages. We used [go(lang)](https://golang.org/) to write both a buffered channel (FIFO) server and two example clients. The server provides a go channel for each identifier added to the list through the API. Then, read and write methods are available for clients to interchange information with FIFO-alike interfaces. Moreover, helper functions for clients can be built to a shared library and it can be used in third-party applications (probably written in C/C++).
 
 - `lib/`: definition of the API. Language-specific sources are generated with `protoc` (see [run](./run)).
 - `server/`: server that implements the API defined in `lib/lib.proto`, and provides channels as FIFO interfaces.
