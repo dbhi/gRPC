@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/umarcor/dbhi/gRPC/lib"
+	"github.com/dbhi/gRPC/lib"
 	"golang.org/x/net/context"
 	grpc "google.golang.org/grpc"
 )

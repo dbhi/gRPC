@@ -14,7 +14,7 @@ This subdir contains sources to provide inter-process communication through [gRP
 In order to build all the pieces, `protoc`, `golang` and `gcc` are required. If docker is available, image `aptman/dbhi:stretch-gRPC` can be used. Start a container as follows:
 
 ``` bash
-# WORK_DIR="/go/src/github.com/umarcor/dbhi/gRPC"
+# WORK_DIR="/go/src/github.com/dbhi/gRPC"
 # $(command -v winpty) docker run --rm -itv "/$(pwd):/$WORK_DIR" -w "/$WORK_DIR" aptman/dbhi:stretch-gRPC bash
 ```
 
