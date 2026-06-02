@@ -16,11 +16,11 @@ func main() {
 	}
 
 	for {
-		v, err := client.Read_blocking(from, 2)
+		adr, dat, err := client.Read_blocking(from, 2)
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = client.Write_blocking(to, uut(v), 2)
+		err = client.Write_blocking(to, adr, uut(dat), 2)
 		if err != nil {
 			log.Fatal(err)
 		}

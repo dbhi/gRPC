@@ -32,7 +32,7 @@ type ChansClient interface {
 	List(ctx context.Context, in *Void, opts ...grpc.CallOption) (*ChanList, error)
 	Reg(ctx context.Context, in *Register, opts ...grpc.CallOption) (*Void, error)
 	Wr(ctx context.Context, in *Write, opts ...grpc.CallOption) (*Void, error)
-	Rd(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Value, error)
+	Rd(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Message, error)
 }
 
 type chansClient struct {
@@ -73,9 +73,9 @@ func (c *chansClient) Wr(ctx context.Context, in *Write, opts ...grpc.CallOption
 	return out, nil
 }
 
-func (c *chansClient) Rd(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Value, error) {
+func (c *chansClient) Rd(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Message, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Value)
+	out := new(Message)
 	err := c.cc.Invoke(ctx, Chans_Rd_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -90,7 +90,7 @@ type ChansServer interface {
 	List(context.Context, *Void) (*ChanList, error)
 	Reg(context.Context, *Register) (*Void, error)
 	Wr(context.Context, *Write) (*Void, error)
-	Rd(context.Context, *Id) (*Value, error)
+	Rd(context.Context, *Id) (*Message, error)
 }
 
 // UnimplementedChansServer should be embedded to have
@@ -109,7 +109,7 @@ func (UnimplementedChansServer) Reg(context.Context, *Register) (*Void, error) {
 func (UnimplementedChansServer) Wr(context.Context, *Write) (*Void, error) {
 	return nil, status.Error(codes.Unimplemented, "method Wr not implemented")
 }
-func (UnimplementedChansServer) Rd(context.Context, *Id) (*Value, error) {
+func (UnimplementedChansServer) Rd(context.Context, *Id) (*Message, error) {
 	return nil, status.Error(codes.Unimplemented, "method Rd not implemented")
 }
 func (UnimplementedChansServer) testEmbeddedByValue() {}

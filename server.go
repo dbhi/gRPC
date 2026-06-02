@@ -1,23 +1,20 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"log"
 	"net"
 
 	"github.com/dbhi/gRPC/lib"
-	"golang.org/x/net/context"
 	grpc "google.golang.org/grpc"
 )
-
-func init() {
-	db = make(map[string]*stream)
-}
 
 func main() {
 	log.Println("DBHI gRPC server")
 	srv := grpc.NewServer()
 	var chans chanServer
+	chans.db = make(map[string]*stream)
 	lib.RegisterChansServer(srv, chans)
 	l, err := net.Listen("tcp", ":8888")
 	if err != nil {
@@ -26,18 +23,21 @@ func main() {
 	log.Fatal(srv.Serve(l))
 }
 
-type chanServer struct{}
+type chanServer struct {
+	db map[string]*stream
+}
 
-var chans lib.ChanList
+type message struct {
+	adr int32
+	dat int32
+}
 
-var db map[string]*stream
+type stream chan message
 
-type stream chan int32
-
-func (s *stream) read() (i int32, err error) {
+func (s *stream) read() (msg message, err error) {
 	valid := false
 	select {
-	case i, valid = <-*s:
+	case msg, valid = <-*s:
 		if !valid {
 			err = errors.New("closed")
 		}
@@ -47,56 +47,52 @@ func (s *stream) read() (i int32, err error) {
 	return
 }
 
-func (s *stream) write(i int32) (err error) {
+func (s *stream) write(msg message) (err error) {
 	select {
-	case *s <- i:
+	case *s <- msg:
 	default:
 		err = errors.New("full")
 	}
 	return
 }
 
-func (chanServer) List(ctx context.Context, void *lib.Void) (*lib.ChanList, error) {
-	return &chans, nil
+// API
+
+func (c chanServer) List(ctx context.Context, void *lib.Void) (*lib.ChanList, error) {
+	var list lib.ChanList
+	for k := range c.db {
+		list.Ids = append(list.Ids, &lib.Id{Id: k})
+	}
+	return &list, nil
 }
 
-func printList() {
+func (c chanServer) Reg(ctx context.Context, args *lib.Register) (*lib.Void, error) {
+	log.Println("REG", args)
+	v := &lib.Void{}
+	if _, ok := c.db[args.Id]; ok {
+		return v, errors.New("chan exists")
+	}
+	s := make(stream, args.Length)
+	c.db[args.Id] = &s
 	log.Println("Registered channels:")
-	for _, v := range chans.Chans {
-		log.Println("-", v.Id)
+	for k := range c.db {
+		log.Println("-", k)
 	}
+	return v, nil
 }
 
-func (chanServer) Wr(ctx context.Context, args *lib.Write) (v *lib.Void, err error) {
-	v = &lib.Void{}
-	id := args.Id
-	if s, ok := db[id]; ok {
-		err = s.write(args.Val)
-		return
+func (c chanServer) Wr(ctx context.Context, args *lib.Write) (*lib.Void, error) {
+	v := &lib.Void{}
+	if s, ok := c.db[args.Id]; ok {
+		return v, s.write(message{adr: args.Msg.Adr, dat: args.Msg.Dat})
 	}
 	return v, errors.New("chan does not exist")
 }
 
-func (chanServer) Rd(ctx context.Context, i *lib.Id) (v *lib.Value, err error) {
-	v = &lib.Value{}
-	id := i.Id
-	if s, ok := db[id]; ok {
-		v.Val, err = s.read()
-		return
+func (c chanServer) Rd(ctx context.Context, args *lib.Id) (*lib.Message, error) {
+	if s, ok := c.db[args.Id]; ok {
+		item, err := s.read()
+		return &lib.Message{Adr: item.adr, Dat: item.dat}, err
 	}
-	return v, errors.New("chan does not exist")
-}
-
-func (chanServer) Reg(ctx context.Context, r *lib.Register) (v *lib.Void, err error) {
-	log.Println("REG", r)
-	v = &lib.Void{}
-	id := r.Id
-	if _, ok := db[id]; !ok {
-		s := make(stream, r.Length)
-		db[id] = &s
-		chans.Chans = append(chans.Chans, &lib.Id{Id: id})
-		printList()
-		return
-	}
-	return v, errors.New("chan exists")
+	return &lib.Message{}, errors.New("chan does not exist")
 }

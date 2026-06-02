@@ -101,27 +101,28 @@ func (x *Id) GetId() string {
 	return ""
 }
 
-type Value struct {
+type Message struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Val           int32                  `protobuf:"varint,1,opt,name=val,proto3" json:"val,omitempty"`
+	Adr           int32                  `protobuf:"varint,1,opt,name=adr,proto3" json:"adr,omitempty"`
+	Dat           int32                  `protobuf:"varint,2,opt,name=dat,proto3" json:"dat,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Value) Reset() {
-	*x = Value{}
+func (x *Message) Reset() {
+	*x = Message{}
 	mi := &file_lib_lib_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Value) String() string {
+func (x *Message) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Value) ProtoMessage() {}
+func (*Message) ProtoMessage() {}
 
-func (x *Value) ProtoReflect() protoreflect.Message {
+func (x *Message) ProtoReflect() protoreflect.Message {
 	mi := &file_lib_lib_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -133,14 +134,21 @@ func (x *Value) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Value.ProtoReflect.Descriptor instead.
-func (*Value) Descriptor() ([]byte, []int) {
+// Deprecated: Use Message.ProtoReflect.Descriptor instead.
+func (*Message) Descriptor() ([]byte, []int) {
 	return file_lib_lib_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *Value) GetVal() int32 {
+func (x *Message) GetAdr() int32 {
 	if x != nil {
-		return x.Val
+		return x.Adr
+	}
+	return 0
+}
+
+func (x *Message) GetDat() int32 {
+	if x != nil {
+		return x.Dat
 	}
 	return 0
 }
@@ -200,7 +208,7 @@ func (x *Register) GetLength() int32 {
 type Write struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Val           int32                  `protobuf:"varint,2,opt,name=val,proto3" json:"val,omitempty"`
+	Msg           *Message               `protobuf:"bytes,2,opt,name=msg,proto3" json:"msg,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -242,16 +250,16 @@ func (x *Write) GetId() string {
 	return ""
 }
 
-func (x *Write) GetVal() int32 {
+func (x *Write) GetMsg() *Message {
 	if x != nil {
-		return x.Val
+		return x.Msg
 	}
-	return 0
+	return nil
 }
 
 type ChanList struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Chans         []*Id                  `protobuf:"bytes,1,rep,name=chans,proto3" json:"chans,omitempty"`
+	Ids           []*Id                  `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -286,9 +294,9 @@ func (*ChanList) Descriptor() ([]byte, []int) {
 	return file_lib_lib_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *ChanList) GetChans() []*Id {
+func (x *ChanList) GetIds() []*Id {
 	if x != nil {
-		return x.Chans
+		return x.Ids
 	}
 	return nil
 }
@@ -300,24 +308,24 @@ const file_lib_lib_proto_rawDesc = "" +
 	"\rlib/lib.proto\x12\x03lib\"\x06\n" +
 	"\x04Void\"\x14\n" +
 	"\x02Id\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\x19\n" +
-	"\x05Value\x12\x10\n" +
-	"\x03val\x18\x01 \x01(\x05R\x03val\"2\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"-\n" +
+	"\aMessage\x12\x10\n" +
+	"\x03adr\x18\x01 \x01(\x05R\x03adr\x12\x10\n" +
+	"\x03dat\x18\x02 \x01(\x05R\x03dat\"2\n" +
 	"\bRegister\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
-	"\x06length\x18\x02 \x01(\x05R\x06length\")\n" +
+	"\x06length\x18\x02 \x01(\x05R\x06length\"7\n" +
 	"\x05Write\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x10\n" +
-	"\x03val\x18\x02 \x01(\x05R\x03val\")\n" +
-	"\bChanList\x12\x1d\n" +
-	"\x05chans\x18\x01 \x03(\v2\a.lib.IdR\x05chans2\x8a\x01\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1e\n" +
+	"\x03msg\x18\x02 \x01(\v2\f.lib.MessageR\x03msg\"%\n" +
+	"\bChanList\x12\x19\n" +
+	"\x03ids\x18\x01 \x03(\v2\a.lib.IdR\x03ids2\x8c\x01\n" +
 	"\x05Chans\x12\"\n" +
 	"\x04List\x12\t.lib.Void\x1a\r.lib.ChanList\"\x00\x12!\n" +
 	"\x03Reg\x12\r.lib.Register\x1a\t.lib.Void\"\x00\x12\x1d\n" +
 	"\x02Wr\x12\n" +
-	".lib.Write\x1a\t.lib.Void\"\x00\x12\x1b\n" +
-	"\x02Rd\x12\a.lib.Id\x1a\n" +
-	".lib.Value\"\x00B\x06Z\x04/libb\x06proto3"
+	".lib.Write\x1a\t.lib.Void\"\x00\x12\x1d\n" +
+	"\x02Rd\x12\a.lib.Id\x1a\f.lib.Message\"\x00B\x06Z\x04/libb\x06proto3"
 
 var (
 	file_lib_lib_proto_rawDescOnce sync.Once
@@ -335,26 +343,27 @@ var file_lib_lib_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_lib_lib_proto_goTypes = []any{
 	(*Void)(nil),     // 0: lib.Void
 	(*Id)(nil),       // 1: lib.Id
-	(*Value)(nil),    // 2: lib.Value
+	(*Message)(nil),  // 2: lib.Message
 	(*Register)(nil), // 3: lib.Register
 	(*Write)(nil),    // 4: lib.Write
 	(*ChanList)(nil), // 5: lib.ChanList
 }
 var file_lib_lib_proto_depIdxs = []int32{
-	1, // 0: lib.ChanList.chans:type_name -> lib.Id
-	0, // 1: lib.Chans.List:input_type -> lib.Void
-	3, // 2: lib.Chans.Reg:input_type -> lib.Register
-	4, // 3: lib.Chans.Wr:input_type -> lib.Write
-	1, // 4: lib.Chans.Rd:input_type -> lib.Id
-	5, // 5: lib.Chans.List:output_type -> lib.ChanList
-	0, // 6: lib.Chans.Reg:output_type -> lib.Void
-	0, // 7: lib.Chans.Wr:output_type -> lib.Void
-	2, // 8: lib.Chans.Rd:output_type -> lib.Value
-	5, // [5:9] is the sub-list for method output_type
-	1, // [1:5] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	2, // 0: lib.Write.msg:type_name -> lib.Message
+	1, // 1: lib.ChanList.ids:type_name -> lib.Id
+	0, // 2: lib.Chans.List:input_type -> lib.Void
+	3, // 3: lib.Chans.Reg:input_type -> lib.Register
+	4, // 4: lib.Chans.Wr:input_type -> lib.Write
+	1, // 5: lib.Chans.Rd:input_type -> lib.Id
+	5, // 6: lib.Chans.List:output_type -> lib.ChanList
+	0, // 7: lib.Chans.Reg:output_type -> lib.Void
+	0, // 8: lib.Chans.Wr:output_type -> lib.Void
+	2, // 9: lib.Chans.Rd:output_type -> lib.Message
+	6, // [6:10] is the sub-list for method output_type
+	2, // [2:6] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_lib_lib_proto_init() }

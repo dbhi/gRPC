@@ -21,19 +21,22 @@ func main() {
 	for y := 0; y < 3; y++ {
 		for x := 0; x < k; x++ {
 			log.Println("Write request to", y, x)
-			err = client.Write_blocking(to, int32(x), 2)
+			err = client.Write_blocking(to, int32(1000+x), int32(x), 2)
 			if err != nil {
 				log.Fatal(err)
 			}
 		}
 		for x := 0; x < k; x++ {
 			log.Println("Read response from", y, x)
-			v, err := client.Read_blocking(from, 2)
+			adr, dat, err := client.Read_blocking(from, 2)
 			if err != nil {
 				log.Fatal(err)
 			}
-			if v != int32(x*3) {
-				log.Fatal("mismatch!", x, x*3, v)
+			if adr != int32(1000+x) {
+				log.Fatal("mismatch!", x, 1000+x, adr)
+			}
+			if dat != int32(x*3) {
+				log.Fatal("mismatch!", x, x*3, dat)
 			}
 		}
 		log.Println("Wait 5 seconds...", y)

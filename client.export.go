@@ -26,17 +26,17 @@ func goRegister(s []string) (e string) {
 }
 
 //export goReadBlocking
-func goReadBlocking(id string, t int) (v int32) {
-	v, err := client.Read_blocking(id, t)
+func goReadBlocking(id string, t int) (adr int32, dat int32) {
+	adr, dat, err := client.Read_blocking(id, t)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return v
+	return adr, dat
 }
 
 //export goWriteBlocking
-func goWriteBlocking(id string, v int32, t int) {
-	err := client.Write_blocking(id, v, t)
+func goWriteBlocking(id string, adr int32, dat int32, t int) {
+	err := client.Write_blocking(id, adr, dat, t)
 	if err != nil {
 		log.Fatal(err)
 	}

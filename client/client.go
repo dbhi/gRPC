@@ -14,7 +14,7 @@ import (
 var client lib.ChansClient
 var ctx context.Context
 
-// connect establishes a connection with the server at 'addr', and gets identifiers for both the client and the context.
+// Connect establishes a connection with the server at 'addr', and gets identifiers for both the client and the context.
 // For now, it is insecure (see WithInsecure).
 func Connect(addr string) {
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
@@ -25,7 +25,7 @@ func Connect(addr string) {
 	ctx = context.Background()
 }
 
-// register checks if each of the elements in a slice of IDs is found in the list retrieved from the server.
+// Register checks if each of the elements in a slice of IDs is found in the list retrieved from the server.
 // If it is not present, it is registered (added).
 func Register(ids []string) (err error) {
 	l, err := list()
@@ -47,8 +47,8 @@ func Register(ids []string) (err error) {
 func list() (l []string, err error) {
 	u := &lib.ChanList{}
 	u, err = client.List(ctx, &lib.Void{})
-	if (err == nil) && len(u.Chans) != 0 {
-		for _, v := range u.Chans {
+	if (err == nil) && len(u.Ids) != 0 {
+		for _, v := range u.Ids {
 			l = append(l, v.Id)
 		}
 	}
@@ -67,68 +67,54 @@ func check_id(l []string, id string) bool {
 	return false
 }
 
-// read pops a value from channel 'id'.
-// Returns the value and an error. If the channel is empty, the content of the error is "empty".
-func read(id string) (v int32, err error) {
-	d := &lib.Value{}
-	d, err = client.Rd(ctx, &lib.Id{Id: id})
-	if err != nil {
-		if m, _ := regexp.Match("desc = empty", []byte(err.Error())); m {
-			err = errors.New("empty")
-		}
-		return
+// read pops a message (adr and dat) from channel 'id'.
+// Returns the message and any error.
+func read(id string) (int32, int32, error) {
+	msg, err := client.Rd(ctx, &lib.Id{Id: id})
+	if err == nil {
+		return msg.Adr, msg.Dat, nil
 	}
-	v = d.Val
-	return
+	if m, _ := regexp.Match("desc = empty", []byte(err.Error())); m {
+		err = errors.New("EMPTY")
+	}
+	return 0, 0, err
 }
 
-// read_blocking tries to pop a value from channel 'id' with intervals of 't' seconds, until a successful read is achieved.
-// Returns the value and any error which is not "empty".
-func Read_blocking(id string, t int) (v int32, err error) {
+// Read_blocking tries to pop a message from channel 'id' with intervals of 't' seconds, until a successful read is achieved.
+// Returns the message (adr and dat) and any error which is not "empty".
+func Read_blocking(id string, t int) (adr int32, dat int32, err error) {
 	for {
-		v, err = read(id)
-		if err == nil {
-			break
-		}
-		if err.Error() == "empty" {
-			log.Println("Empty stream. Retry in", t, "seconds...")
-			time.Sleep(time.Duration(t) * time.Second)
-		} else {
+		adr, dat, err = read(id)
+		if err == nil || (err.Error() != "EMPTY") {
 			return
 		}
+		log.Println("Empty stream. Retry in", t, "seconds...")
+		time.Sleep(time.Duration(t) * time.Second)
 	}
-	return
 }
 
-// write pushes a value, 'v', to channel 'id'.
-// Returns an error. If the channel is full, the content of the error is 'full'.
-func write(id string, v int32) (err error) {
-	_, err = client.Wr(ctx, &lib.Write{
-		Id:  id,
-		Val: v,
-	})
-	if err != nil {
-		if m, _ := regexp.Match("desc = full", []byte(err.Error())); m {
-			err = errors.New("full")
-		}
+// write pushes a message (adr and dat) to channel 'id'.
+// Returns any error.
+func write(id string, adr int32, dat int32) error {
+	_, err := client.Wr(ctx, &lib.Write{Id: id, Msg: &lib.Message{Adr: adr, Dat: dat}})
+	if err == nil {
+		return nil
 	}
-	return
+	if m, _ := regexp.Match("desc = full", []byte(err.Error())); err == nil && m {
+		err = errors.New("FULL")
+	}
+	return err
 }
 
-// write_blocking tries to push a value 'v' to channel 'id' with intervals of 't' seconds, until a successful write is achieved.
-// Returns any wrror which is not 'full'.
-func Write_blocking(id string, v int32, t int) (err error) {
+// Write_blocking tries to push a message (adr and dat) to channel 'id' with intervals of 't' seconds, until a successful write is achieved.
+// Returns any error which is not 'full'.
+func Write_blocking(id string, adr int32, dat int32, t int) (err error) {
 	for {
-		err = write(id, v)
-		if err == nil {
-			break
-		}
-		if err.Error() == "full" {
-			log.Println("Full stream. Retry in", t, "seconds...")
-			time.Sleep(time.Duration(t) * time.Second)
-		} else {
+		err = write(id, adr, dat)
+		if err == nil || (err.Error() != "FULL") {
 			return
 		}
+		log.Println("Full stream. Retry in", t, "seconds...")
+		time.Sleep(time.Duration(t) * time.Second)
 	}
-	return
 }
