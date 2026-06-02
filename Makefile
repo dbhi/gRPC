@@ -22,7 +22,7 @@ dist: dist/server dist/gen dist/uut-go slib dist/uut-c
 dist/server: lib/lib.pb.go lib/lib_grpc.pb.go server.go
 	go build -a -o dist/server server.go
 
-dist/gen: lib/lib.pb.go lib/lib_grpc.pb.go gen.go
+dist/gen: lib/lib.pb.go lib/lib_grpc.pb.go client/client.go gen.go
 	go build -a -o dist/gen gen.go
 
 dist/uut-go: lib/lib.pb.go lib/lib_grpc.pb.go client/client.go uut.go
