@@ -1,4 +1,4 @@
-package main
+package client
 
 import (
 	"context"
@@ -16,7 +16,7 @@ var ctx context.Context
 
 // connect establishes a connection with the server at 'addr', and gets identifiers for both the client and the context.
 // For now, it is insecure (see WithInsecure).
-func connect(addr string) {
+func Connect(addr string) {
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal("could not connect to backend:", err)
@@ -27,14 +27,14 @@ func connect(addr string) {
 
 // register checks if each of the elements in a slice of IDs is found in the list retrieved from the server.
 // If it is not present, it is registered (added).
-func register(ids []string) (err error) {
+func Register(ids []string) (err error) {
 	l, err := list()
 	if err != nil {
 		return
 	}
 	for _, id := range ids {
 		if !check_id(l, id) {
-			_, err = client.Reg(ctx, &lib.Register{Id: id, Length: 8192})
+			_, err = client.Reg(ctx, &lib.Register{Id: id, Length: 1024})
 			if err != nil {
 				return
 			}
@@ -84,7 +84,7 @@ func read(id string) (v int32, err error) {
 
 // read_blocking tries to pop a value from channel 'id' with intervals of 't' seconds, until a successful read is achieved.
 // Returns the value and any error which is not "empty".
-func read_blocking(id string, t int) (v int32, err error) {
+func Read_blocking(id string, t int) (v int32, err error) {
 	for {
 		v, err = read(id)
 		if err == nil {
@@ -117,7 +117,7 @@ func write(id string, v int32) (err error) {
 
 // write_blocking tries to push a value 'v' to channel 'id' with intervals of 't' seconds, until a successful write is achieved.
 // Returns any wrror which is not 'full'.
-func write_blocking(id string, v int32, t int) (err error) {
+func Write_blocking(id string, v int32, t int) (err error) {
 	for {
 		err = write(id, v)
 		if err == nil {

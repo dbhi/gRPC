@@ -15,6 +15,7 @@ func init() {
 }
 
 func main() {
+	log.Println("DBHI gRPC server")
 	srv := grpc.NewServer()
 	var chans chanServer
 	lib.RegisterChansServer(srv, chans)
@@ -59,6 +60,13 @@ func (chanServer) List(ctx context.Context, void *lib.Void) (*lib.ChanList, erro
 	return &chans, nil
 }
 
+func printList() {
+	log.Println("Registered channels:")
+	for _, v := range chans.Chans {
+		log.Println("-", v.Id)
+	}
+}
+
 func (chanServer) Wr(ctx context.Context, args *lib.Write) (v *lib.Void, err error) {
 	v = &lib.Void{}
 	id := args.Id
@@ -87,6 +95,7 @@ func (chanServer) Reg(ctx context.Context, r *lib.Register) (v *lib.Void, err er
 		s := make(stream, r.Length)
 		db[id] = &s
 		chans.Chans = append(chans.Chans, &lib.Id{Id: id})
+		printList()
 		return
 	}
 	return v, errors.New("chan exists")

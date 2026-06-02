@@ -32,11 +32,12 @@ func main() {
 		}
 	}
 
-	k := 8192
+	k := 10
 
 	for y := 0; y < 3; y++ {
 		x := 0
 		for x < k {
+			log.Println("Write request to", y, x)
 			_, err = c.Wr(ctx, &lib.Write{
 				Id:  to,
 				Val: int32(x),
@@ -55,6 +56,7 @@ func main() {
 
 		x = 0
 		for x < k {
+			log.Println("Read response from", y, x)
 			v, err := c.Rd(ctx, &lib.Id{Id: from})
 			if err != nil {
 				if m, _ := regexp.Match("desc = empty", []byte(err.Error())); m {
