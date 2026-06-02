@@ -12,7 +12,6 @@ func main() {}
 
 //export goConnect
 func goConnect(addr string) {
-	log.Println(addr)
 	client.Connect(addr)
 }
 
@@ -25,6 +24,19 @@ func goRegister(s []string) (e string) {
 	return
 }
 
+//export goRead
+func goRead(id string) (adr int32, dat int32, e string) {
+	adr, dat, err := client.Read(id)
+	if err == nil {
+		return adr, dat, ""
+	}
+	e = err.Error()
+	if e != "EMPTY" {
+		log.Fatal(err)
+	}
+	return 0, 0, e
+}
+
 //export goReadBlocking
 func goReadBlocking(id string, t int) (adr int32, dat int32) {
 	adr, dat, err := client.Read_blocking(id, t)
@@ -32,6 +44,19 @@ func goReadBlocking(id string, t int) (adr int32, dat int32) {
 		log.Fatal(err)
 	}
 	return adr, dat
+}
+
+//export goWrite
+func goWrite(id string, adr int32, dat int32) (e string) {
+	err := client.Write(id, adr, dat)
+	if err == nil {
+		return ""
+	}
+	e = err.Error()
+	if e != "FULL" {
+		log.Fatal(err)
+	}
+	return e
 }
 
 //export goWriteBlocking

@@ -67,9 +67,9 @@ func check_id(l []string, id string) bool {
 	return false
 }
 
-// read pops a message (adr and dat) from channel 'id'.
+// Read pops a message (adr and dat) from channel 'id'.
 // Returns the message and any error.
-func read(id string) (int32, int32, error) {
+func Read(id string) (int32, int32, error) {
 	msg, err := client.Rd(ctx, &lib.Id{Id: id})
 	if err == nil {
 		return msg.Adr, msg.Dat, nil
@@ -84,18 +84,18 @@ func read(id string) (int32, int32, error) {
 // Returns the message (adr and dat) and any error which is not "empty".
 func Read_blocking(id string, t int) (adr int32, dat int32, err error) {
 	for {
-		adr, dat, err = read(id)
+		adr, dat, err = Read(id)
 		if err == nil || (err.Error() != "EMPTY") {
 			return
 		}
-		log.Println("Empty stream. Retry in", t, "seconds...")
+		log.Println("Empty stream", id, "| Retry in", t, "seconds...")
 		time.Sleep(time.Duration(t) * time.Second)
 	}
 }
 
-// write pushes a message (adr and dat) to channel 'id'.
+// Write pushes a message (adr and dat) to channel 'id'.
 // Returns any error.
-func write(id string, adr int32, dat int32) error {
+func Write(id string, adr int32, dat int32) error {
 	_, err := client.Wr(ctx, &lib.Write{Id: id, Msg: &lib.Message{Adr: adr, Dat: dat}})
 	if err == nil {
 		return nil
@@ -110,11 +110,11 @@ func write(id string, adr int32, dat int32) error {
 // Returns any error which is not 'full'.
 func Write_blocking(id string, adr int32, dat int32, t int) (err error) {
 	for {
-		err = write(id, adr, dat)
+		err = Write(id, adr, dat)
 		if err == nil || (err.Error() != "FULL") {
 			return
 		}
-		log.Println("Full stream. Retry in", t, "seconds...")
+		log.Println("Full stream", id, "| Retry in", t, "seconds...")
 		time.Sleep(time.Duration(t) * time.Second)
 	}
 }
